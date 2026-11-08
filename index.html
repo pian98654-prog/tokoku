@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#000;color:#fff;font-family:sans-serif;padding-bottom:70px}
+.top{display:flex;gap:12px;align-items:center;padding:14px 16px}
+.search{flex:1;background:#1c1c1e;border-radius:14px;padding:12px 14px;display:flex;gap:8px;color:#888}
+.search input{background:none;border:0;outline:0;color:#fff;font-size:16px;width:100%}
+.tabs{display:flex;gap:24px;padding:6px 20px;font-size:18px;color:#999;overflow-x:auto}
+.tabs span{padding-bottom:6px;white-space:nowrap}
+.tabs .on{color:#2f7bff;font-weight:bold;border-bottom:3px solid #2f7bff}
+.banner{margin:14px 16px;height:170px;border-radius:18px;background:linear-gradient(135deg,#b3202a,#f2a65a);padding:20px;position:relative;font-size:28px;font-weight:bold;font-style:italic;display:flex;align-items:center}
+.banner b{position:absolute;right:14px;bottom:14px;background:#c4161c;border-radius:14px;font-size:13px;font-style:normal;padding:5px 12px}
+h2{font-size:21px;margin:22px 16px 10px}
+.row{display:flex;gap:14px;overflow-x:auto;padding:0 16px}
+.app{width:92px;flex:none;text-align:center}
+.ic{width:84px;height:84px;border-radius:20px;margin:auto;display:flex;align-items:center;justify-content:center;font-size:40px}
+.nm{font-size:14px;margin:8px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sz{font-size:12px;color:#888}
+.btn{margin-top:8px;border:0;background:#12233f;color:#2f7bff;font-weight:bold;border-radius:18px;padding:8px 0;width:100%;font-size:13px}
+.btn.open{background:#222;color:#bbb}
+nav{position:fixed;bottom:0;left:0;right:0;height:62px;background:#111;display:flex}
+nav div{flex:1;text-align:center;font-size:11px;color:#888;padding-top:8px}
+nav div i{display:block;font-style:normal;font-size:22px}
+nav .on{color:#2f7bff}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:0 12px}
+.grid .app{width:auto}
+</style></head><body>
+<div class="top"><span style="font-size:28px">🎮</span>
+<div class="search">🔍<input id="q" placeholder="Cari aplikasi..." oninput="render()"></div>
+<span style="font-size:26px">⬇️</span></div>
+<div id="main"></div>
+<nav id="nav"></nav>
+<script>
+const A=[
+["Video Pendek","🎵","#222","401M","Populer","app"],["Domino Seru","🎲","#d6336c","212M","Populer","game"],
+["Epic Hero","🪓","#f08c00","212M","Populer","game"],["Puzzle Air","🧪","#37474f","96M","Populer","game"],
+["Foto Hidup","📸","#333","31M","Suka","app"],["Video Snack","▶️","#f7c600","183M","Suka","app"],
+["VPN Lite","🔑","#12b886","18M","Suka","app"],["Asisten AI","🤖","#5f3dc4","35M","Suka","app"],
+["Tembak Alien","👾","#862e9c","60M","Baru","game"],["Hantu Lucu","👻","#1c7ed6","45M","Baru","game"],
+["Koki Gila","👨‍🍳","#2f9e44","88M","Baru","game"],["Hoki Slot","🍀","#e8590c","70M","Baru","game"],
+["Novel Baca","📖","#364fc7","25M","Instan","app"],["Kalkulator","🧮","#495057","5M","Instan","app"],
+["Senter","🔦","#fab005","3M","Instan","app"],["Catatan","📝","#0ca678","8M","Instan","app"]];
+const inst=JSON.parse(localStorage.getItem("inst")||"{}");
+let page=0,tab=0;
+const T=["Untukmu","Novel","Populer","Anak"];
+const N=[["🏠","Beranda"],["🎮","Game"],["⚡","Instan"],["🛍️","Aplikasi"],["👤","Saya"]];
+function card(a){const i=A.indexOf(a),s=inst[i];
+return `<div class="app"><div class="ic" style="background:${a[2]}">${a[1]}</div><div class="nm">${a[0]}</div><div class="sz">${a[3]}</div>
+<button class="btn ${s==2?'open':''}" onclick="get(${i})">${s==2?'Buka':s==1?'Memasang...':'Mendapatkan'}</button></div>`}
+function get(i){if(inst[i]==2){alert("Membuka "+A[i][0]);return}
+if(inst[i]==1)return;inst[i]=1;render();
+setTimeout(()=>{inst[i]=2;localStorage.setItem("inst",JSON.stringify(inst));render()},1800)}
+function row(t,f){const l=A.filter(f);return l.length?`<h2>${t} ›</h2><div class="row">${l.map(card).join("")}</div>`:""}
+function render(){const q=document.getElementById("q").value.toLowerCase();let h="";
+if(q){h=`<h2>Hasil pencarian</h2><div class="grid">${A.filter(a=>a[0].toLowerCase().includes(q)).map(card).join("")}</div>`}
+else if(page==0){
+h=`<div class="tabs">${T.map((t,i)=>`<span class="${i==tab?'on':''}" onclick="tab=${i};render()">${t}</span>`).join("")}</div>
+<div class="banner">Jiwa<br>Pahlawan<b>Masuk</b></div>`+
+row("Paling Populer",a=>a[4]=="Populer")+row("Pasti Kamu Suka!",a=>a[4]=="Suka")+row("Game Seru Terbaru!",a=>a[4]=="Baru")}
+else{const f=[0,a=>a[5]=="game",a=>a[4]=="Instan",a=>a[5]=="app",a=>inst[A.indexOf(a)]==2][page];
+h=`<h2>${N[page][1]}</h2><div class="grid">${A.filter(f).map(card).join("")||'<p style="padding:16px;color:#888">Belum ada.</p>'}</div>`}
+document.getElementById("main").innerHTML=h;
+document.getElementById("nav").innerHTML=N.map((n,i)=>`<div class="${i==page?'on':''}" onclick="page=${i};render()"><i>${n[0]}</i>${n[1]}</div>`).join("")}
+render();
+</script></body></html>
