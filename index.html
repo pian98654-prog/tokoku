@@ -35,46 +35,76 @@ nav .on{color:#2f7bff}
 <div id="main"></div>
 <nav id="nav"></nav>
 <script>
-const BASE=[
-{n:"WhatsApp",e:"💬",c:"#25d366",u:"https://www.whatsapp.com/android/current/WhatsApp.apk",cat:"app",p:1},
-{n:"Telegram",e:"✈️",c:"#2aabee",u:"https://telegram.org/dl/android/apk",cat:"app",p:1},
+const P=(n,e,c,k,cat,hot)=>({n:n,e:e,c:c,k:k,u:"https://play.google.com/store/apps/details?id="+k,cat:cat,p:1,hot:hot});
+const DIRECT=[
+{hot:1,n:"WhatsApp",e:"💬",c:"#25d366",u:"https://www.whatsapp.com/android/current/WhatsApp.apk",cat:"app",p:1},
+{hot:1,n:"Telegram",e:"✈️",c:"#2aabee",u:"https://telegram.org/dl/android/apk",cat:"app",p:1},
 {n:"F-Droid",e:"📦",c:"#1976d2",u:"https://f-droid.org/F-Droid.apk",cat:"app",p:1}];
+const BASE=DIRECT.concat([
+P("TikTok","🎵","#161616","com.zhiliaoapp.musically","app",1),
+P("TikTok Lite","🎶","#222","com.tiktok.lite.go","app",0),
+P("Instagram","📷","#c13584","com.instagram.android","app",1),
+P("YouTube","▶️","#e03131","com.google.android.youtube","app",1),
+P("Facebook","👍","#1877f2","com.facebook.katana","app",0),
+P("Spotify","🎧","#1db954","com.spotify.music","app",0),
+P("Shopee","🛒","#ee4d2d","com.shopee.id","app",0),
+P("Gojek","🛵","#00aa13","com.gojek.app","app",0),
+P("Free Fire","🔥","#f5a623","com.dts.freefireth","game",1),
+P("Free Fire MAX","💥","#e8590c","com.dts.freefiremax","game",1),
+P("Mobile Legends","⚔️","#1c4e9a","com.mobile.legends","game",1),
+P("PUBG Mobile","🎯","#8a6d3b","com.tencent.ig","game",0),
+P("Roblox","🧱","#c92a2a","com.roblox.client","game",0),
+P("Minecraft","⛏️","#4c9a2a","com.mojang.minecraftpe","game",0),
+P("Genshin Impact","✨","#3b5bdb","com.miHoYo.GenshinImpact","game",0)]);
 const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
-let cus=ld("cus",[]),st=ld("st",{}),prog={},page=0,tab=0,pesan="";
+let fail={},lastErr="";let cus=ld("cus",[]),st=ld("st",{}),prog={},page=0,tab=0,pesan="";
 const B=window.AndroidB;
 const all=()=>BASE.concat(cus);
 const save=()=>{localStorage.setItem("cus",JSON.stringify(cus));localStorage.setItem("st",JSON.stringify(st))};
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const T=["Untukmu","Novel","Populer","Anak"];
 const N=[["🏠","Beranda"],["🎮","Game"],["⬇️","Unduhan"],["🛍️","Aplikasi"],["👤","Saya"]];
-function label(u){const s=st[u];if(!s)return"Mendapatkan";if(s.done)return"Pasang";return(prog[u]||0)+"%"}
+function label(u){if(u.indexOf("https://play.google.com/")==0)return"Play Store";if(fail[u])return"Browser";const s=st[u];if(!s)return"Mendapatkan";if(s.done)return"Pasang";return prog[u]||"Memulai"}
 function upd(){document.querySelectorAll("[data-u]").forEach(b=>b.textContent=label(b.dataset.u))}
-function card(a,i){return `<div class="app"><div class="ic" style="background:${a.c}">${a.e}</div><div class="nm">${esc(a.n)}</div><div class="sz">${a.p?"Resmi":"Tambahan"}</div><button class="btn" data-u="${esc(a.u)}" onclick="get(${i})">${label(a.u)}</button></div>`}
+const DOM={"WhatsApp":"whatsapp.com","Telegram":"telegram.org","F-Droid":"f-droid.org","TikTok":"tiktok.com","TikTok Lite":"tiktok.com","Instagram":"instagram.com","YouTube":"youtube.com","Facebook":"facebook.com","Spotify":"spotify.com","Shopee":"shopee.co.id","Gojek":"gojek.com","Free Fire":"ff.garena.com","Free Fire MAX":"ff.garena.com","Mobile Legends":"mobilelegends.com","PUBG Mobile":"pubgmobile.com","Roblox":"roblox.com","Minecraft":"minecraft.net","Genshin Impact":"genshin.hoyoverse.com"};
+function ic(a){const d=DOM[a.n];
+if(!d||a.cus)return `<div class="ic" style="background:${a.c}">${a.e}</div>`;
+return `<div class="ic" style="background:#1c1c1e;overflow:hidden"><img style="width:100%;height:100%" src="https://www.google.com/s2/favicons?domain=${d}&sz=128" data-e="${a.e}" onerror="var p=this.parentNode;p.style.background='${a.c}';p.textContent=this.dataset.e"></div>`}
+function card(a,i){return `<div class="app">${ic(a)}<div class="nm">${esc(a.n)}</div><div class="sz">${a.k?"Play Store":a.p?"Resmi":"Tambahan"}</div><button class="btn" data-u="${esc(a.u)}" onclick="get(${i})">${label(a.u)}</button></div>`}
 function get(i){const a=all()[i],s=st[a.u];
+if(a.k){if(B)B.openUrl(a.u);else window.open(a.u);return}
+if(fail[a.u]){if(B)B.openUrl(a.u);else window.open(a.u);return}
 if(s&&s.done){if(B)B.install(s.id);return}
 if(s)return;
 if(!B){window.open(a.u);return}
 const id=B.download(a.u,a.n);
-if(id<0){window.open(a.u);return}
-st[a.u]={id:id,done:0};prog[a.u]=0;save();upd()}
+if(id<0){fail[a.u]=1;lastErr="gagal memulai";upd();return}
+st[a.u]={id:id,done:0};prog[a.u]="Memulai";save();upd()}
 setInterval(()=>{if(!B)return;let ch=0;
 for(const u in st){const s=st[u];if(s.done)continue;
-const [x,d,t]=String(B.status(s.id)).split("|").map(Number);
-if(x==8){s.done=1;ch=1}else if(x==16||x==0){delete st[u];ch=1}else prog[u]=t>0?Math.floor(d*100/t):0}
-if(ch)save();upd()},1000);
+const [x,d,t,r]=String(B.status(s.id)).split("|").map(Number);
+if(x==8){s.done=1;ch=1}
+else if(x==16||x==0){delete st[u];fail[u]=1;lastErr="kode "+x+"/"+r;ch=1}
+else if(x==1)prog[u]="Menunggu";
+else if(x==4)prog[u]="Jeda";
+else prog[u]=t>0?Math.floor(d*100/t)+"%":(d>0?(d/1048576).toFixed(1)+" MB":"Memulai")}
+if(ch)save();upd();
+const e=document.getElementById("err");if(e)e.textContent=lastErr?"Unduhan gagal ("+lastErr+"). Tekan tombol Browser untuk mengunduh lewat browser.":""},1000);
 function list(f){return all().map((a,i)=>[a,i]).filter(x=>f(x[0]))}
 function grid(l,kosong){return l.length?`<div class="grid">${l.map(x=>card(x[0],x[1])).join("")}</div>`:`<p class="hint">${kosong}</p>`}
 function addApp(){const n=document.getElementById("an").value.trim(),u=document.getElementById("au").value.trim(),c=document.getElementById("ac").value;
 if(!n||!/^https?:\/\//.test(u)){pesan="Isi nama dan tautan APK yang diawali https://";render();return}
-cus.push({n:n,e:c=="game"?"🎮":"📱",c:"#455a64",u:u,cat:c});pesan="Ditambahkan!";save();render()}
+cus.push({cus:1,n:n,e:c=="game"?"🎮":"📱",c:"#455a64",u:u,cat:c});pesan="Ditambahkan!";save();render()}
 function del(i){cus.splice(i-BASE.length,1);save();render()}
 function render(){const q=document.getElementById("q").value.toLowerCase();let h="";
 if(q){h=`<h2>Hasil pencarian</h2>`+grid(list(a=>a.n.toLowerCase().includes(q)),"Tidak ditemukan.")}
 else if(page==0){
 h=`<div class="tabs">${T.map((t,i)=>`<span class="${i==tab?"on":""}" onclick="tab=${i};render()">${t}</span>`).join("")}</div><div class="banner">Toko<br>Aplikasi</div>`
-+`<h2>Paling Populer ›</h2><div class="row">${list(a=>a.p).map(x=>card(x[0],x[1])).join("")}</div>`
++`<h2>Paling Populer ›</h2><div class="row">${list(a=>a.hot).map(x=>card(x[0],x[1])).join("")}</div>`
++`<h2>Game Seru Terbaru! ›</h2><div class="row">${list(a=>a.p&&a.cat=="game").map(x=>card(x[0],x[1])).join("")}</div>`
++`<h2>Pasti Kamu Suka! ›</h2><div class="row">${list(a=>a.p&&a.cat=="app").map(x=>card(x[0],x[1])).join("")}</div>`
 +(cus.length?`<h2>Tambahanmu ›</h2><div class="row">${list(a=>!a.p).map(x=>card(x[0],x[1])).join("")}</div>`:"")
-+`<p class="hint" style="margin-top:20px">Mau aplikasi lain? Buka tab Saya, lalu tambahkan tautan APK-nya.</p>`}
++`<p class="hint" id="err" style="margin-top:16px"></p><p class="hint" style="margin-top:12px">Mau aplikasi lain? Buka tab Saya, lalu tambahkan tautan APK-nya.</p>`}
 else if(page==1){h=`<h2>Game</h2>`+grid(list(a=>a.cat=="game"),"Belum ada game. Tambahkan lewat tab Saya.")}
 else if(page==2){h=`<h2>Unduhan</h2>`+grid(list(a=>st[a.u]),"Belum ada unduhan.")}
 else if(page==3){h=`<h2>Aplikasi</h2>`+grid(list(a=>a.cat=="app"),"Kosong.")}

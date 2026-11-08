@@ -43,13 +43,28 @@ public class MainActivity extends Activity {
                     int st = c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
                     long d = c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
                     long t = c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-                    return st + "|" + d + "|" + t;
+                    int r = c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON));
+                    return st + "|" + d + "|" + t + "|" + r;
                 }
             } catch (Exception e) {
             } finally {
                 if (c != null) c.close();
             }
-            return "0|0|0";
+            return "0|0|0|0";
+        }
+
+        @JavascriptInterface
+        public void openUrl(final String url) {
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    try {
+                        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(i);
+                    } catch (Exception e) {
+                    }
+                }
+            });
         }
 
         @JavascriptInterface
